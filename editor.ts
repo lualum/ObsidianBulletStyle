@@ -35,7 +35,8 @@ export function bulletReplacementPlugin(plugin: BetterBulletsPlugin) {
             if (
                update.docChanged ||
                update.viewportChanged ||
-               update.selectionSet
+               update.selectionSet ||
+               this.plugin.settingsChanged
             ) {
                this.decorations = this.format(update.view);
             }

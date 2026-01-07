@@ -8,6 +8,7 @@ import {
 
 export default class BetterBulletsPlugin extends Plugin {
    settings: BetterBulletsSettings;
+   settingsChanged = false;
 
    async onload() {
       await this.loadSettings();

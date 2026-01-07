@@ -2,10 +2,10 @@ import BetterBulletsPlugin from "main";
 import { App, PluginSettingTab, Setting } from "obsidian";
 
 export interface BetterBulletsSettings {
-   boldNonLeafText: boolean; // bold text for non-leaf bullets
-   parentSize: number; // font size multiplier for parent bullets
-   grandparentSize: number; // font size multiplier for grandparent bullets
-   exclamationTextColor: string; // color for lines ending with !
+   boldNonLeafText: boolean;
+   parentSize: number;
+   grandparentSize: number;
+   exclamationTextColor: string;
 }
 
 export const DEFAULT_SETTINGS: BetterBulletsSettings = {
@@ -25,126 +25,66 @@ export class BetterBulletsSettingTab extends PluginSettingTab {
 
    display(): void {
       const { containerEl } = this;
-      const d = DEFAULT_SETTINGS;
-
       containerEl.empty();
 
       containerEl.createEl("h3", { text: "Text Formatting" });
 
-      // Bold grandparent text
       new Setting(containerEl)
          .setName("Bold non-leaf text")
-         .setDesc("Bold text for non-leaf bullets (→).")
          .addToggle((toggle) =>
             toggle
                .setValue(this.plugin.settings.boldNonLeafText)
                .onChange(async (value) => {
                   this.plugin.settings.boldNonLeafText = value;
-                  await this.plugin.saveSettings();
+                  this.triggerRefresh();
                })
          );
 
       containerEl.createEl("h3", { text: "Font Size Multipliers" });
 
-      // Parent font size multiplier
       new Setting(containerEl)
          .setName("Parent bullet font size")
-         .setDesc(
-            `Font size multiplier for parent bullets (→). Default is ${d.parentSize}.`
-         )
          .addText((text) =>
             text
-               .setPlaceholder(String(d.parentSize))
                .setValue(String(this.plugin.settings.parentSize))
                .onChange(async (value) => {
-                  const numValue = parseFloat(value);
-                  if (!isNaN(numValue) && numValue > 0) {
-                     this.plugin.settings.parentSize = numValue;
-                     await this.plugin.saveSettings();
+                  const num = parseFloat(value);
+                  if (!isNaN(num)) {
+                     this.plugin.settings.parentSize = num;
+                     this.triggerRefresh();
                   }
                })
          );
 
-      // Grandparent font size multiplier
       new Setting(containerEl)
          .setName("Grandparent bullet font size")
-         .setDesc(
-            `Font size multiplier for grandparent bullets (⇒). Default is ${d.grandparentSize}.`
-         )
          .addText((text) =>
             text
-               .setPlaceholder(String(d.grandparentSize))
                .setValue(String(this.plugin.settings.grandparentSize))
                .onChange(async (value) => {
-                  const numValue = parseFloat(value);
-                  if (!isNaN(numValue) && numValue > 0) {
-                     this.plugin.settings.grandparentSize = numValue;
-                     await this.plugin.saveSettings();
+                  const num = parseFloat(value);
+                  if (!isNaN(num)) {
+                     this.plugin.settings.grandparentSize = num;
+                     this.triggerRefresh();
                   }
                })
          );
 
-      containerEl.createEl("h3", { text: "Text Colors" });
-
-      // Exclamation text color
       new Setting(containerEl)
          .setName("Exclamation line color")
-         .setDesc(
-            `Color for lines ending with ! (bold and colored). Default is ${d.exclamationTextColor}.`
-         )
          .addText((text) =>
             text
-               .setPlaceholder(d.exclamationTextColor)
                .setValue(this.plugin.settings.exclamationTextColor)
                .onChange(async (value) => {
                   this.plugin.settings.exclamationTextColor = value;
-                  await this.plugin.saveSettings();
+                  this.triggerRefresh();
                })
          );
+   }
 
-      containerEl.createEl("h3", { text: "Symbol Legend" });
-
-      const legendContainer = containerEl.createDiv({ cls: "bullet-legend" });
-      legendContainer.createEl("p", {
-         text: "- Leaf bullets with no children",
-      });
-      legendContainer.createEl("p", { text: "→ Parent bullets with children" });
-      legendContainer.createEl("p", {
-         text: "⇒ Grandparent bullets with grandchildren",
-      });
-      legendContainer.createEl("p", {
-         text: "∗ Note bullets (lines starting with 'Note:')",
-      });
-
-      containerEl.createEl("p", {
-         text: "Note: Bullets with ⇒ or at the first indent level are displayed in accent color (unless custom color specified) and bold.",
-         cls: "setting-item-description",
-      });
-
-      containerEl.createEl("hr");
-
-      containerEl.createEl("h3", { text: "Auto-Formatting Rules" });
-
-      const rulesContainer = containerEl.createDiv({ cls: "formatting-rules" });
-      rulesContainer.createEl("p", {
-         text: "When auto-formatting is enabled:",
-      });
-      rulesContainer.createEl("p", {
-         text: "• Structure: Bold text for parent (→) and grandparent (⇒) bullets",
-      });
-      rulesContainer.createEl("p", {
-         text: "• Definitions: Term | Definition → Term is bold and highlighted, definition is italic",
-      });
-      rulesContainer.createEl("p", { text: '• Quotes: "text" → Italic' });
-      rulesContainer.createEl("p", { text: "• Parentheses: (text) → Italic" });
-      rulesContainer.createEl("p", {
-         text: "• Dates: 4-digit years (e.g., 2024) → Underlined",
-      });
-      rulesContainer.createEl("p", {
-         text: "• Notes: Lines starting with 'Note:' → ∗ bullet, italic text, bold 'Note:'",
-      });
-      rulesContainer.createEl("p", {
-         text: "• Exclamation: Lines ending with ! → Bold and custom color (takes precedence over all other rules)",
-      });
+   private async triggerRefresh() {
+      this.plugin.settingsChanged = true;
+      await this.plugin.saveSettings();
+      this.app.workspace.updateOptions();
    }
 }
