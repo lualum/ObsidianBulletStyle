@@ -124,7 +124,8 @@ export function bulletReplacementPlugin(plugin: BetterBulletsPlugin) {
             index: number,
             level: number
          ): BulletType {
-            let symbol: BulletType;
+            const styles: string[] = [];
+            let symbolChar: string;
 
             const bulletPos = index + line[1].length;
             const textIndex = bulletPos + line[2].length + line[3].length;
@@ -132,21 +133,43 @@ export function bulletReplacementPlugin(plugin: BetterBulletsPlugin) {
             const text = fullText.trim();
             const trimOffset = fullText.indexOf(text);
 
+            // Set base symbol and size based on level
+            let fontSize: string | null = null;
             switch (level) {
                case 0:
-                  symbol = { symbol: "-" };
+                  symbolChar = "-";
                   break;
                case 1:
-                  symbol = { symbol: "→" };
+                  symbolChar = "→";
+                  fontSize = `${this.plugin.settings.parentSize}em`;
+                  styles.push(`font-size: ${fontSize}`);
                   break;
                default:
-                  symbol = { symbol: "⇒" };
+                  symbolChar = "⇒";
+                  fontSize = `${this.plugin.settings.grandparentSize}em`;
+                  styles.push(`font-size: ${fontSize}`);
                   break;
+            }
+
+            // Apply font size to entire line if level > 0
+            if (fontSize) {
+               const lineStart = textIndex + trimOffset;
+               const lineEnd = textIndex + trimOffset + text.length;
+               const fontSizeDecoration = Decoration.mark({
+                  attributes: {
+                     style: `font-size: ${fontSize};`,
+                  },
+               });
+               decorations.push({
+                  from: lineStart,
+                  to: lineEnd,
+                  decoration: fontSizeDecoration,
+               });
             }
 
             // 1. Note formatting (Note: )
             if (text.startsWith("Note: ")) {
-               symbol = { symbol: "*" };
+               symbolChar = "*";
 
                const noteStart = textIndex + trimOffset;
                const noteEnd = noteStart + 5; // "Note:" is 5 characters
@@ -176,7 +199,7 @@ export function bulletReplacementPlugin(plugin: BetterBulletsPlugin) {
             // 2. Definition formatting (Term | Definition)
             const pipeIndex = text.indexOf(" | ");
             if (pipeIndex !== -1) {
-               symbol = { symbol: "@" };
+               symbolChar = "@";
 
                // Term (before pipe): bold and highlight
                const termStart = textIndex + trimOffset;
@@ -208,10 +231,11 @@ export function bulletReplacementPlugin(plugin: BetterBulletsPlugin) {
 
             // 3. Important formatting (!)
             if (text.endsWith("!")) {
-               symbol = {
-                  symbol: "!",
-                  style: `font-weight: bold; color: ${this.plugin.settings.exclamationTextColor};`,
-               };
+               symbolChar = "!";
+               styles.push("font-weight: bold");
+               styles.push(
+                  `color: ${this.plugin.settings.exclamationTextColor}`
+               );
 
                const importantStart = textIndex + trimOffset;
                const importantEnd = textIndex + trimOffset + text.length;
@@ -274,6 +298,12 @@ export function bulletReplacementPlugin(plugin: BetterBulletsPlugin) {
                   decoration: underlineDecoration,
                });
             }
+
+            // Combine all styles
+            const symbol: BulletType = {
+               symbol: symbolChar,
+               ...(styles.length > 0 && { style: styles.join("; ") }),
+            };
 
             return symbol;
          }

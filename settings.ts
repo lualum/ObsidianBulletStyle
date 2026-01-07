@@ -3,8 +3,8 @@ import { App, PluginSettingTab, Setting } from "obsidian";
 
 export interface BetterBulletsSettings {
    boldNonLeafText: boolean; // bold text for non-leaf bullets
-   parentFontSizeMultiplier: number; // font size multiplier for parent bullets
-   grandparentFontSizeMultiplier: number; // font size multiplier for grandparent bullets
+   parentSize: number; // font size multiplier for parent bullets
+   grandparentSize: number; // font size multiplier for grandparent bullets
    leafTextColor: string; // color for leaf bullet text
    parentTextColor: string; // color for parent bullet text
    grandparentTextColor: string; // color for grandparent bullet text (empty = use accent)
@@ -13,8 +13,8 @@ export interface BetterBulletsSettings {
 
 export const DEFAULT_SETTINGS: BetterBulletsSettings = {
    boldNonLeafText: true,
-   parentFontSizeMultiplier: 1.0,
-   grandparentFontSizeMultiplier: 1.0,
+   parentSize: 1.0,
+   grandparentSize: 1.0,
    leafTextColor: "",
    parentTextColor: "",
    grandparentTextColor: "",
@@ -60,16 +60,16 @@ export class BetterBulletsSettingTab extends PluginSettingTab {
       new Setting(containerEl)
          .setName("Parent bullet font size")
          .setDesc(
-            `Font size multiplier for parent bullets (→). Default is ${d.parentFontSizeMultiplier}.`
+            `Font size multiplier for parent bullets (→). Default is ${d.parentSize}.`
          )
          .addText((text) =>
             text
-               .setPlaceholder(String(d.parentFontSizeMultiplier))
-               .setValue(String(this.plugin.settings.parentFontSizeMultiplier))
+               .setPlaceholder(String(d.parentSize))
+               .setValue(String(this.plugin.settings.parentSize))
                .onChange(async (value) => {
                   const numValue = parseFloat(value);
                   if (!isNaN(numValue) && numValue > 0) {
-                     this.plugin.settings.parentFontSizeMultiplier = numValue;
+                     this.plugin.settings.parentSize = numValue;
                      await this.plugin.saveSettings();
                   }
                })
@@ -79,19 +79,16 @@ export class BetterBulletsSettingTab extends PluginSettingTab {
       new Setting(containerEl)
          .setName("Grandparent bullet font size")
          .setDesc(
-            `Font size multiplier for grandparent bullets (⇒). Default is ${d.grandparentFontSizeMultiplier}.`
+            `Font size multiplier for grandparent bullets (⇒). Default is ${d.grandparentSize}.`
          )
          .addText((text) =>
             text
-               .setPlaceholder(String(d.grandparentFontSizeMultiplier))
-               .setValue(
-                  String(this.plugin.settings.grandparentFontSizeMultiplier)
-               )
+               .setPlaceholder(String(d.grandparentSize))
+               .setValue(String(this.plugin.settings.grandparentSize))
                .onChange(async (value) => {
                   const numValue = parseFloat(value);
                   if (!isNaN(numValue) && numValue > 0) {
-                     this.plugin.settings.grandparentFontSizeMultiplier =
-                        numValue;
+                     this.plugin.settings.grandparentSize = numValue;
                      await this.plugin.saveSettings();
                   }
                })
