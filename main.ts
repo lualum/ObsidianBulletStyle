@@ -8,7 +8,6 @@ import {
 
 export default class BetterBulletsPlugin extends Plugin {
    settings: BetterBulletsSettings;
-   settingsChanged = false;
 
    async onload() {
       await this.loadSettings();
@@ -26,6 +25,17 @@ export default class BetterBulletsPlugin extends Plugin {
 
    async saveSettings() {
       await this.saveData(this.settings);
-      this.app.workspace.updateOptions();
+   }
+
+   refreshEditors() {
+      // Force all editor views to update
+      this.app.workspace.iterateAllLeaves((leaf) => {
+         if (leaf.view.getViewType() === "markdown") {
+            const view = leaf.view as any;
+            if (view.editor?.cm) {
+               view.editor.cm.requestMeasure();
+            }
+         }
+      });
    }
 }

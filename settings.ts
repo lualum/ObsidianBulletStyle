@@ -83,8 +83,7 @@ export class BetterBulletsSettingTab extends PluginSettingTab {
    }
 
    private async triggerRefresh() {
-      this.plugin.settingsChanged = true;
       await this.plugin.saveSettings();
-      this.app.workspace.updateOptions();
+      this.plugin.refreshEditors();
    }
 }
