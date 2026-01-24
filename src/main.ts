@@ -37,8 +37,8 @@ export default class BetterBulletsPlugin extends Plugin {
 			if (!editor) return;
 
 			// Obsidian attaches CodeMirror EditorView at runtime
-			const cm = editor.cm as EditorView | undefined;
-			if (!cm) return;
+			if (!("cm" in editor)) return;
+			const cm = editor.cm as EditorView;
 
 			cm.dispatch({
 				selection: cm.state.selection,
