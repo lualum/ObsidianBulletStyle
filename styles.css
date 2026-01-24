@@ -3,3 +3,10 @@
 	padding-top: 4px;
 	padding-bottom: 4px;
 }
+
+.bullet-span {
+	display: inline-block;
+	position: relative;
+	left: 1em;
+	transform: translateX(-50%);
+}
